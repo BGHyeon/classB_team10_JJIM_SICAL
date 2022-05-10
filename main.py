@@ -22,17 +22,40 @@ def login_request():
 # 회원가입 관련 기능 (승현)
 @app.route('/join',methods=['GET'])
 def join():
-    return render_template('')
+    return render_template('join.html')
 
 @app.route('/join',methods=['POST'])
 def join_request():
-    print('hello')
-    return
+    id_receive = request.form['id_give']
+    pw_receive = request.form['pw_give']
+    name_give = request.form['name_give']
+    gender_give = request.form['gender_give']
+    nick_give = request.form['nick_give']
+    phone_give = request.form['phone_give']
+
+    doc = {'id': id_receive,
+           'pw': pw_receive,
+           'name': name_give,
+           'gender': gender_give,
+           'nick': nick_give,
+           'phone': phone_give, }
+    db.user.insert_one(doc)
+
+    return jsonify({'msg': '가입 완료'})
 
 @app.route('/idcheck',methods=['POST'])
-def idcheck():
-    print('hello')
-    return
+def show_id():
+    id_receive = request.form['id_give']
+    all_user = list(db.user.find({},{'_id':False}))
+    # print(all_user)
+    msg ='아이디를 입력해주세요'
+    for user in all_user:
+        if user['id'] == id_receive:
+            msg = '중복된 아이디입니다.'
+        else:
+            msg = '생성 가능한 아이디입니다.'
+    # print(all_movies[0]['title'])
+    return jsonify({'msg': msg})
 
 
 # 메인 페이지 관련 기능 개발(규현, 승재)
