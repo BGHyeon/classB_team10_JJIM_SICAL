@@ -28,6 +28,10 @@
             text-align: center;
         }
 
+        .banner-container {
+            flex: ;
+        }
+
         .logo {
             display: flex;
             align-items: center;
@@ -176,14 +180,19 @@
         .commentdiv {
             margin-top: 20px;
         }
+
     </style>
 </head>
 <body>
 <div class="logo">
     <p class="logo-txt">JJIMSICAL</p>
+
+</div>
+<div class="d-flex flex-row-reverse p-2">
+    <button class="favorite_btn btn btn-outline-danger" onclick="toggleFavorite()" id="favorite_btn">찜 목록만 보기</button>
 </div>
 <div class="container">
-    <div class="row overflow-hidden" style="height: auto">
+    <div class="row overflow-hidden" style="height: auto" id="item-box">
         {% for i in data %}
 
         <div class="col-md-2 card p-3 item" onclick="getMusicalInfo(this.id)" id="{{i['id']}}">
@@ -261,7 +270,6 @@
     }
 
     function modal_clsbtn() {
-        console.log('here')
         document.querySelector(".background").className = "background";
     }
 
@@ -283,7 +291,6 @@
             type: 'GET',
             url: '/info/' + id,
             success: function (response) {
-
                 console.log(response)
                 alert(response['name'] + '\n' + response['location'] + '\n' + response['date'])
                 $('#modal_title').text(response['name']);
@@ -291,6 +298,33 @@
             }
         })
     }
+
+    function toggleFavorite() {
+
+        $.ajax({
+            type: 'GET',
+            url: '/userinfo',
+            success: function (response) {
+                favoritelist = response['favorite']
+                let performs = document.getElementById('item-box').children
+                performs.forEach(element => {
+                    performid = element.getAttribute('id');
+                    if (favoritelist.contains(performid)) {
+                        element.style.display = '';
+                    } else {
+                        element.style.display = 'none';
+                    }
+                })
+                button = $('#favorite_btn');
+                if (button.text() == '찜 목록만 보기') {
+                    button.text('전체 보기')
+                } else {
+                    button.text('찜 목록만 보기')
+                }
+            }
+        })
+    }
+
 </script>
 </body>
 </html>

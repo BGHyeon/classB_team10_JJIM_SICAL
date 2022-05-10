@@ -1,4 +1,4 @@
-from flask import Flask, render_template, abort, jsonify, request, redirect, url_for
+from flask import Flask, render_template, abort, jsonify, request, redirect, url_for,session
 from pymongo import MongoClient
 from selenium import webdriver
 import requests
@@ -69,7 +69,8 @@ def join_request():
            'name': name_give,
            'gender': gender_give,
            'nick': nick_give,
-           'phone': phone_give, }
+           'phone': phone_give,
+           'favorite':[]}
     db.user.insert_one(doc)
 
     return jsonify({'msg': '가입 완료'})
@@ -92,10 +93,27 @@ def show_id():
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
 def index():
+    token_resive = request.cookies.get('jwt_token')
+    try:
+        payload = jwt.decode(token_resive,SECRET_KEY,algorithms=['HS256'])
+        user_info = db.user.find_one({'id':payload['id']});
+        session['id'] = user_info['id'];
+        lists = list(db.performance.find({},{'_id':False}))
+        return render_template('index.html',data=lists)
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for('login',msg='로그인 시간이 만료되었습니다.'))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for('login', msg='로그인 정보가 없습니다.'))
 
-    lists = list(db.performance.find({},{'_id':False}))
-
-    return render_template('index.html',data=lists)
+@app.route('/userinfo',methods=['GET'])
+def get_user_info():
+    userid = session.get('id','NoInfo')
+    if userid == 'NoInfo':
+        abort(404)
+    data = db.user.find_one({'id': userid}, {'_id': False})
+    if data is None:
+        abort(404)
+    return jsonify(data)
 
 @app.route('/info/<musicalid>',methods=['GET'])
 def get_musical_info(musicalid):
