@@ -1,11 +1,16 @@
 from flask import Flask, render_template,abort,jsonify
+
 from pymongo import MongoClient
+import certifi
+
+ca = certifi.where()
+
 from selenium import webdriver
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 import uuid
-client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority", tlsCAFile=ca)
 db = client.jjimsical
 app = Flask(__name__)
 sched = BackgroundScheduler(daemon=True)
@@ -52,7 +57,14 @@ def get_musical_info(musicalid):
 
 @app.route('/add/comment',methods=['POST'])
 def add_comment():
-    return
+    comment_receive = request.form['comment_give']
+
+    doc = {
+        'comment': comment_receive,
+    }
+    db.performance.insert_one(doc)
+    
+    return jsonify({'msg': '코멘트 등록 완료'})
 
 @app.route('/add/favorite',methods=['POST'])
 def add_favorite():
@@ -134,4 +146,4 @@ def crawlingInfo():
 sched.start()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0',port=8000,debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)
