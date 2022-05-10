@@ -116,30 +116,35 @@ def get_user_info():
 
 @app.route('/info/<musicalid>',methods=['GET'])
 def get_musical_info(musicalid):
-    print(musicalid)
     data = db.performance.find_one({'id':musicalid},{'_id':False})
     if data is None:
         abort(404)
-    print(data)
     return jsonify(data)
 
 @app.route('/add/comment',methods=['POST'])
 def add_comment():
     return
 
-@app.route('/add/favorite',methods=['POST'])
-def add_favorite():
-    return
+@app.route('/add/favorite/<musicalid>',methods=['PATCH'])
+def add_favorite(musicalid):
+    msg = ''
+    try:
+        userid = session.get('id', 'Noinfo')
+        user = db.user.find_one({'id':userid},{'_id':False})
+        favorites = list(user['favorite'])
+        if musicalid in favorites:
+            favorites.remove(musicalid)
+            msg = '찜 목록에서 제거되었습니다.'
+        else:
+            favorites.append(musicalid)
+            msg='찜 등록되었습니다.'
+        db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
+    except:
+        msg = '오류발생 나중에 다시 시도해 주세요'
+    return jsonify({'msg':msg})
 
 @app.route('/remove/comment',methods=['POST'])
 def remove_comment():
-    return
-
-@app.route('/remove/favorite',methods=['POST'])
-def remove_favorite():
-    return
-
-def refreshData():
     return
 
 @sched.scheduled_job('cron',hour='0',minute='0',id='initdata')
@@ -201,6 +206,7 @@ def crawlingInfo():
         data = db.performance.find_one({'url': item['url']})
         if data is None:
             db.performance.insert_one(item)
+
     driver.quit()
     return
 

@@ -300,12 +300,39 @@
             }
         })
     }
+    function refreshFavoirteList(){
+        $.ajax({
+            type: 'GET',
+            url: '/userinfo',
+            success: function (response) {
+                favoritelist = response['favorite']
+                console.log(response)
+                let performs = document.getElementById('item-box').children
+                for (var i = 0 ; i <  performs.length; i++){
+                    element = performs[i]
+                    performid = element.getAttribute('id');
+                    if (favoritelist.includes(performid)) {
+                        element.style.display = '';
+                    } else {
+                        element.style.display ='none';
+                    }
+                }
+            }
+        })
+    }
+
     function toggleAddFavorite(id){
-        console.log(id);
-        // $.ajax({
-        //     type:'POST',
-        //     url:''
-        // })
+        $.ajax({
+            type:'PATCH',
+            url:'/add/favorite/'+id,
+            success:function (response){
+                alert(response['msg'])
+                 button = $('#favorite_btn');
+                if (button.text() == '전체 보기') {
+                    refreshFavoirteList();
+                }
+            }
+        })
     }
     function toggleViewFavorite() {
 
