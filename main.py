@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-from flask import Flask, render_template,abort,jsonify
-
-=======
 from flask import Flask, render_template, abort, jsonify, request, redirect, url_for,session
->>>>>>> 62329365d2091a906cca7cb338b35a682f975df9
+
 from pymongo import MongoClient
 import certifi
 
