@@ -28,7 +28,7 @@ def join_request():
     return
 
 @app.route('/idcheck',methods=['POST'])
-def join_request():
+def join_equest():
     print('hello')
     return
 
