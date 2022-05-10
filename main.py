@@ -21,7 +21,7 @@ db = client.jjimsical
 app = Flask(__name__)
 sched = BackgroundScheduler(daemon=True)
 SECRET_KEY = 'jjimsical'
-
+app.secret_key=SECRET_KEY
 @app.route('/login')
 def login():
    return render_template('login.html')
@@ -31,16 +31,15 @@ def sign_in():
 
     username_receive = request.form['username_give']
     password_receive = request.form['password_give']
-
     pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
-    result = db.users.find_one({'id': username_receive, 'pw': pw_hash})
+    result = db.user.find_one({'id': username_receive, 'pw': pw_hash},{'_id':False})
 
     if result is not None:
         payload = {
          'id': username_receive,
          'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
         }
-        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 
         return jsonify({'result': 'success', 'token': token})
 
@@ -68,9 +67,9 @@ def join_request():
     gender_give = request.form['gender_give']
     nick_give = request.form['nick_give']
     phone_give = request.form['phone_give']
-
+    hash_pw = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
     doc = {'id': id_receive,
-           'pw': pw_receive,
+           'pw': hash_pw,
            'name': name_give,
            'gender': gender_give,
            'nick': nick_give,
@@ -98,7 +97,7 @@ def show_id():
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
 def index():
-    token_resive = request.cookies.get('jwt_token')
+    token_resive = request.cookies.get('mytoken')
     try:
         payload = jwt.decode(token_resive,SECRET_KEY,algorithms=['HS256'])
         user_info = db.user.find_one({'id':payload['id']});
@@ -122,11 +121,9 @@ def get_user_info():
 
 @app.route('/info/<musicalid>',methods=['GET'])
 def get_musical_info(musicalid):
-    print(musicalid)
     data = db.performance.find_one({'id':musicalid},{'_id':False})
     if data is None:
         abort(404)
-    print(data)
     return jsonify(data)
 
 @app.route('/add/comment',methods=['POST'])
@@ -140,19 +137,26 @@ def add_comment():
     
     return jsonify({'msg': '코멘트 등록 완료'})
 
-@app.route('/add/favorite',methods=['POST'])
-def add_favorite():
-    return
+@app.route('/add/favorite/<musicalid>',methods=['PATCH'])
+def add_favorite(musicalid):
+    msg = ''
+    try:
+        userid = session.get('id', 'Noinfo')
+        user = db.user.find_one({'id':userid},{'_id':False})
+        favorites = list(user['favorite'])
+        if musicalid in favorites:
+            favorites.remove(musicalid)
+            msg = '찜 목록에서 제거되었습니다.'
+        else:
+            favorites.append(musicalid)
+            msg='찜 등록되었습니다.'
+        db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
+    except:
+        msg = '오류발생 나중에 다시 시도해 주세요'
+    return jsonify({'msg':msg})
 
 @app.route('/remove/comment',methods=['POST'])
 def remove_comment():
-    return
-
-@app.route('/remove/favorite',methods=['POST'])
-def remove_favorite():
-    return
-
-def refreshData():
     return
 
 @sched.scheduled_job('cron',hour='0',minute='0',id='initdata')
@@ -214,6 +218,7 @@ def crawlingInfo():
         data = db.performance.find_one({'url': item['url']})
         if data is None:
             db.performance.insert_one(item)
+
     driver.quit()
     return
 
