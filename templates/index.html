@@ -189,7 +189,7 @@
 
 </div>
 <div class="d-flex flex-row-reverse p-2">
-    <button class="favorite_btn btn btn-outline-danger" onclick="toggleFavorite()" id="favorite_btn">찜 목록만 보기</button>
+    <button class="favorite_btn btn btn-outline-danger" onclick="toggleViewFavorite()" id="favorite_btn">찜 목록만 보기</button>
 </div>
 <div class="container">
     <div class="row overflow-hidden" style="height: auto" id="item-box">
@@ -246,7 +246,7 @@
             </div>
             <div class="modalbtns">
                 <button onclick="코멘트 등록()" type="button" class="btn btn-dark">코멘트 등록</button>
-                <button onclick="찜()" type="button" class="btn btn-outline-dark">찜 ❤️</button>
+                <button onclick="toggleAddFavorite(this.title)" type="button" class="btn btn-outline-dark" id="toggle-favorite" title="">찜 ❤️</button>
             </div>
             <div class="modal_clsbtn_div">
                 <button id="modal_clsbtn" class="modal_clsbtn" onclick="modal_clsbtn()">닫기</button>
@@ -294,27 +294,40 @@
                 console.log(response)
                 alert(response['name'] + '\n' + response['location'] + '\n' + response['date'])
                 $('#modal_title').text(response['name']);
+                $('#modal_title').text(response['name']);
+                $('#toggle-favorite').attr('title',response['id'])
                 show()
             }
         })
     }
-
-    function toggleFavorite() {
+    function toggleAddFavorite(id){
+        console.log(id);
+        // $.ajax({
+        //     type:'POST',
+        //     url:''
+        // })
+    }
+    function toggleViewFavorite() {
 
         $.ajax({
             type: 'GET',
             url: '/userinfo',
             success: function (response) {
                 favoritelist = response['favorite']
+                console.log(response)
                 let performs = document.getElementById('item-box').children
-                performs.forEach(element => {
+                for (var i = 0 ; i <  performs.length; i++){
+                    element = performs[i]
                     performid = element.getAttribute('id');
-                    if (favoritelist.contains(performid)) {
+                    if (favoritelist.includes(performid)) {
                         element.style.display = '';
                     } else {
-                        element.style.display = 'none';
+                        if(element.style.display == 'none')
+                            element.style.display = '';
+                        else
+                            element.style.display ='none';
                     }
-                })
+                }
                 button = $('#favorite_btn');
                 if (button.text() == '찜 목록만 보기') {
                     button.text('전체 보기')
