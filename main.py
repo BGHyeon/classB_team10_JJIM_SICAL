@@ -15,7 +15,7 @@ client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Clust
 db = client.jjimsical
 app = Flask(__name__)
 sched = BackgroundScheduler(daemon=True)
-SECRET_KEY = 'SPARTA'
+SECRET_KEY = 'jjimsical'
 
 @app.route('/login')
 def login():
@@ -28,7 +28,7 @@ def sign_in():
     password_receive = request.form['password_give']
 
     pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
-    result = db.users.find_one({'username': username_receive, 'password': pw_hash})
+    result = db.users.find_one({'id': username_receive, 'pw': pw_hash})
 
     if result is not None:
         payload = {
