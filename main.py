@@ -1,5 +1,7 @@
-from flask import Flask, render_template,request,jsonify
+from flask import Flask, render_template,abort,jsonify
 from pymongo import MongoClient
+from selenium import webdriver
+import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 import uuid
@@ -28,7 +30,7 @@ def join_request():
     return
 
 @app.route('/idcheck',methods=['POST'])
-def join_request():
+def idcheck():
     print('hello')
     return
 
@@ -36,11 +38,17 @@ def join_request():
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
 def index():
-    return render_template('index.html')
+    lists = list(db.performance.find({},{'_id':False}))
+    return render_template('index.html',data=lists)
 
-@app.route('/info',methods=['POST'])
-def get_musical_info():
-    return
+@app.route('/info/<musicalid>',methods=['GET'])
+def get_musical_info(musicalid):
+    print(musicalid)
+    data = db.performance.find_one({'id':musicalid},{'_id':False})
+    if data is None:
+        abort(404)
+    print(data)
+    return jsonify(data)
 
 @app.route('/add/comment',methods=['POST'])
 def add_comment():
@@ -63,9 +71,67 @@ def refreshData():
 
 @sched.scheduled_job('cron',hour='0',minute='0',id='initdata')
 def crawlingInfo():
+    baseUrl = 'http://ticket.yes24.com'
+    url = 'http://ticket.yes24.com/New/Rank/Ranking.aspx'
+    driver_options = webdriver.ChromeOptions()
+    driver_options.add_argument("headless")
+    driver = webdriver.Chrome(executable_path='./chromedriver')
+    res = driver.get(url)
+
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+    herfs = []
+    best_div = soup.find('div', {'class': 'rank-best'}).find_all('div')
+
+    for a in best_div:
+        urls = a.find('a')['href']
+        res = requests.get(baseUrl + urls)
+        asoup = BeautifulSoup(res.content, 'html.parser')
+        data = {
+            'id': str(uuid.uuid1()),
+            'url': urls,
+            'poster': a.select_one('span.rank-best-img').select_one('img')['src'],
+            'name': a.select_one('p.rlb-tit').text,
+            'date': a.select_one('p.rlb-sub-tit').text[0:21],
+            'location': a.select_one('p.rlb-sub-tit').text[21:],
+        }
+
+        herfs.append(data)
+
+    list_div = soup.find('div', {'class': 'rank-list'}).find_all('div')
+
+    for b in list_div:
+        urlss = b.select_one('p.rank-list-tit')
+        if urlss is not None:
+
+            urls = b.select_one('p.rank-list-tit').select_one('a')
+            res = requests.get(baseUrl + urls['href'])
+            asoup = BeautifulSoup(res.content, 'html.parser')
+            poster = asoup.select_one('div.rn-product-imgbox').select_one('img')['src']
+            date = asoup.select_one('span.ps-date').text
+            location = asoup.find('span', {'class': 'ps-location'})
+            locationText = ''
+            if location is None:
+                locationText = 'No Info'
+            else:
+                locationText = location.text
+            data = {
+                'id': str(uuid.uuid1()),
+                'url': urls['href'],
+                'poster': poster,
+                'name': b.select_one('p.rank-list-tit').text,
+                'date': date,
+                'location': locationText,
+            }
+            herfs.append(data)
+
+    for item in herfs:
+        data = db.performance.find_one({'url': item['url']})
+        if data is None:
+            db.performance.insert_one(item)
+    driver.quit()
     return
 
 sched.start()
 
-if __name__ == '__name__':
-    app.run('0.0.0.0',port=5000,debug=True)
+if __name__ == '__main__':
+    app.run('0.0.0.0',port=8000,debug=True)
