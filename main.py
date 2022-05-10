@@ -1,7 +1,13 @@
-from flask import Flask, render_template,abort,jsonify
+from flask import Flask, render_template, abort, jsonify, request, redirect, url_for
 from pymongo import MongoClient
 from selenium import webdriver
 import requests
+import jwt
+import datetime
+import hashlib
+from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 import uuid
@@ -9,20 +15,35 @@ client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Clust
 db = client.jjimsical
 app = Flask(__name__)
 sched = BackgroundScheduler(daemon=True)
-# login 관련 기능 (종연)
+SECRET_KEY = 'SPARTA'
 
 @app.route('/login')
 def login():
    return render_template('login.html')
 
-@app.route('/login',methods=['GET'])
-def login_get():
-    return render_template('')
+@app.route('/sign_in', methods=['POST'])
+def sign_in():
 
-@app.route('/login',methods=['POST'])
-def login_request():
-    print('hello')
-    return
+    username_receive = request.form['username_give']
+    password_receive = request.form['password_give']
+
+    pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
+    result = db.users.find_one({'username': username_receive, 'password': pw_hash})
+
+    if result is not None:
+        payload = {
+         'id': username_receive,
+         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode('utf-8')
+
+        return jsonify({'result': 'success', 'token': token})
+
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
+
+
 
 # 회원가입 관련 기능 (승현)
 
@@ -71,7 +92,9 @@ def show_id():
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
 def index():
+
     lists = list(db.performance.find({},{'_id':False}))
+
     return render_template('index.html',data=lists)
 
 @app.route('/info/<musicalid>',methods=['GET'])

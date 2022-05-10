@@ -60,8 +60,30 @@
         }
     </style>
     <script>
-        function to_join(){
+        function to_join() {
             window.location.href = "/join"
+        }
+
+        function sign_in() {
+            let username = $("#input-username").val()
+            let password = $("#input-password").val()
+
+            $.ajax({
+                type: "POST",
+                url: "/sign_in",
+                data: {
+                    username_give: username,
+                    password_give: password
+                },
+                success: function (response) {
+                    if (response['result'] == 'success') {
+                        $.cookie('mytoken', response['token'], {path: '/'});
+                        window.location.replace("/")
+                    } else {
+                        alert(response['msg'])
+                    }
+                }
+            });
         }
     </script>
 
@@ -75,18 +97,18 @@
 <div class="login">
     <div class="input-group flex-nowrap">
         <span class="input-group-text" id="addon-wrapping">👤</span>
-        <input type="text" class="form-control" placeholder="아이디를 입력해주세요" aria-label=""
+        <input id="input-username" type="text" class="form-control" placeholder="아이디를 입력해주세요" aria-label=""
                aria-describedby="addon-wrapping" spellcheck="false">
     </div>
 
     <div class="input-group flex-nowrap">
         <span class="input-group-text" id="addon-wrapping">👥</span>
-        <input type="text" class="form-control" placeholder="비밀번호를 입력해 주세요" aria-label=""
+        <input id="input-password" type="password" class="form-control" placeholder="비밀번호를 입력해 주세요" aria-label=""
                aria-describedby="addon-wrapping" spellcheck="false">
     </div>
 
     <div class="d-grid gap-2">
-        <button class="btn btn-primary" type="button">LOGIN</button>
+        <button onclick="sign_in()"class="btn btn-primary" type="button">LOGIN</button>
     </div>
 
     <h7 class="if">아직 회원이 아니라면</h7>
