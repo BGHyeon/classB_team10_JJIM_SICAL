@@ -10,8 +10,13 @@ db = client.jjimsical
 app = Flask(__name__)
 sched = BackgroundScheduler(daemon=True)
 # login 관련 기능 (종연)
-@app.route('/login',methods=['GET'])
+
+@app.route('/login')
 def login():
+   return render_template('login.html')
+
+@app.route('/login',methods=['GET'])
+def login_get():
     return render_template('')
 
 @app.route('/login',methods=['POST'])
@@ -20,8 +25,13 @@ def login_request():
     return
 
 # 회원가입 관련 기능 (승현)
-@app.route('/join',methods=['GET'])
+
+@app.route('/join')
 def join():
+   return render_template('join.html')
+
+@app.route('/join',methods=['GET'])
+def join_get():
     return render_template('join.html')
 
 @app.route('/join',methods=['POST'])

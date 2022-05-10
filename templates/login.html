@@ -59,7 +59,11 @@
             color: #F1F3F5;
         }
     </style>
-
+    <script>
+        function to_join(){
+            window.location.href = "/join"
+        }
+    </script>
 
 </head>
 
@@ -90,7 +94,7 @@
     <hr>
 
     <div class="d-grid gap-3">
-        <button class="btn btn-primary" type="button">회원가입</button>
+        <button onclick="to_join()" class="btn btn-primary" type="button">회원가입</button>
     </div>
 </div>
 </body>
