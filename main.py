@@ -1,4 +1,4 @@
-from flask import Flask, render_template,abort,jsonify
+from flask import Flask, render_template,abort,jsonify,session,request,redirect,url_for
 from pymongo import MongoClient
 from selenium import webdriver
 import requests
@@ -7,24 +7,39 @@ from bs4 import BeautifulSoup
 import uuid
 import hashlib
 import jwt
-import datetime
-SECRET_KEY = 'SPARTA'
-
-
-
+import hashlib
+from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+SECRET_KEY = 'jjimsical'
 client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority")
 db = client.jjimsical
 app = Flask(__name__)
+app.secret_key=SECRET_KEY
 sched = BackgroundScheduler(daemon=True)
 # login 관련 기능 (종연)
 @app.route('/login',methods=['GET'])
 def login():
-    return render_template('')
+    return render_template('login.html')
 
-@app.route('/login',methods=['POST'])
-def login_request():
-    print('hello')
-    return
+@app.route('/sign_in', methods=['POST'])
+def sign_in():
+    username_receive = request.form['username_give']
+    password_receive = request.form['password_give']
+    pw_hash = hashlib.sha256(password_receive.encode('utf-8')).hexdigest()
+    result = db.user.find_one({'id': username_receive, 'pw': pw_hash},{'_id':False})
+
+    if result is not None:
+        payload = {
+         'id': username_receive,
+         'exp': datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
+        }
+        token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
+
+        return jsonify({'result': 'success', 'token': token})
+
+    else:
+        return jsonify({'result': 'fail', 'msg': '아이디/비밀번호가 일치하지 않습니다.'})
+
 
 # 회원가입 관련 기능 (승현)
 @app.route('/join')
@@ -47,10 +62,11 @@ def join_request():
            'name': name_give,
            'gender': gender_give,
            'nick': nick_give,
-           'phone': phone_give, }
+           'phone': phone_give,
+           'favorite':[]}
     db.user.insert_one(doc)
 
-    return jsonify({'result': 'success' })
+    return jsonify({'result': '가입 완료' })
 
 @app.route('/idcheck',methods=['POST'])
 def show_id():
@@ -66,8 +82,28 @@ def show_id():
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
 def index():
-    lists = list(db.performance.find({},{'_id':False}))
-    return render_template('index.html',data=lists)
+    token_resive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_resive, SECRET_KEY, algorithms=['HS256'])
+        user_info = db.user.find_one({'id': payload['id']});
+        session['id'] = user_info['id'];
+        lists = list(db.performance.find({}, {'_id': False}))
+        return render_template('index.html', data=lists)
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for('login', msg='로그인 시간이 만료되었습니다.'))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for('login', msg='로그인 정보가 없습니다.'))
+
+@app.route('/userinfo',methods=['GET'])
+def get_user_info():
+    userid = session.get('id','NoInfo')
+    if userid == 'NoInfo':
+        abort(404)
+    data = db.user.find_one({'id': userid}, {'_id': False})
+    if data is None:
+        abort(404)
+    return jsonify(data)
+
 
 @app.route('/info/<musicalid>',methods=['GET'])
 def get_musical_info(musicalid):
@@ -80,21 +116,36 @@ def get_musical_info(musicalid):
 
 @app.route('/add/comment',methods=['POST'])
 def add_comment():
-    return
+    comment_receive = request.form['comment_give']
 
-@app.route('/add/favorite',methods=['POST'])
-def add_favorite():
-    return
+    doc = {
+        'comment': comment_receive,
+    }
+    db.performance.insert_one(doc)
+
+    return jsonify({'msg': '코멘트 등록 완료'})
+
+@app.route('/add/favorite/<musicalid>',methods=['PATCH'])
+def add_favorite(musicalid):
+    msg = ''
+    try:
+        userid = session.get('id', 'Noinfo')
+        user = db.user.find_one({'id':userid},{'_id':False})
+        favorites = list(user['favorite'])
+        if musicalid in favorites:
+            favorites.remove(musicalid)
+            msg = '찜 목록에서 제거되었습니다.'
+        else:
+            favorites.append(musicalid)
+            msg='찜 등록되었습니다.'
+        db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
+    except:
+        msg = '오류발생 나중에 다시 시도해 주세요'
+    return jsonify({'msg':msg})
+
 
 @app.route('/remove/comment',methods=['POST'])
 def remove_comment():
-    return
-
-@app.route('/remove/favorite',methods=['POST'])
-def remove_favorite():
-    return
-
-def refreshData():
     return
 
 @sched.scheduled_job('cron',hour='0',minute='0',id='initdata')
@@ -162,4 +213,4 @@ def crawlingInfo():
 sched.start()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0',port=8000,debug=True)
+    app.run('0.0.0.0',port=8080,debug=True)
