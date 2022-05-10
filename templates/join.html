@@ -72,32 +72,25 @@
 
         })
         function check_id() {
-            $.ajax({
-                type: "POST",
-                url: "/idcheck",
-                data: {id_give:$('#id').val()},
-                success: function (response) {
-                    alert(response["msg"])
-                }
-            })
+            if ($('#id').val() == '')
+                alert('아이디를 입력해주세요.')
+            else {
+                $.ajax({
+                    type: "POST",
+                    url: "/idcheck",
+                    data: {id_give: $('#id').val()},
+                    success: function (response) {
+                        alert(response["msg"])
+                    }
+                })
+            }
+
         }
         function cancel() {
-            $.ajax({
-                type: "GET",
-                url: "/join",
-                data: {},
-                success: function (response) {
-
-                }
-            })
+            window.location.href = '/login'
         }
 
         function join() {
-            let pw1 = $('#pw').val()
-            let pw2 = $('#re-pw').val()
-            if (pw1 != pw2) {
-                alert('비밀번호가 맞지 않습니다.')
-            } else {
                 $.ajax({
                     type: "POST",
                     url: "/join",
@@ -110,12 +103,14 @@
                         phone_give: $('#phone').val(),
                     },
                     success: function (response) {
-                        alert(response["msg"])
-                        window.location.reload()
+                        if (response['result'] == 'success') {
+                            alert('회원가입이 완료되었습니다.')
+                            window.location.href = '/login'
+                        } else {
+                            alert('회원가입이 실패하였습니다.')
+                        }
                     }
                 })
-            }
-
         }
 
 
@@ -125,7 +120,7 @@
 <body>
 
     <div class="con">
-        <h1>login</h1>
+        <h1>회원가입</h1>
 
         <div class="input-group mb-3 input-box">
             <input type="text" class="form-control" id="id" placeholder="아이디" aria-label="Username"
