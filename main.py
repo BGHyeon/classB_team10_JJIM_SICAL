@@ -1,17 +1,19 @@
 from flask import Flask, render_template,abort,jsonify,session,request,redirect,url_for
 from pymongo import MongoClient
+import certifi
+ca = certifi.where()
+
 from selenium import webdriver
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 import uuid
-import hashlib
 import jwt
 import hashlib
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 SECRET_KEY = 'jjimsical'
-client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority", tlsCAFile=ca)
 db = client.jjimsical
 app = Flask(__name__)
 app.secret_key=SECRET_KEY
@@ -114,16 +116,31 @@ def get_musical_info(musicalid):
     print(data)
     return jsonify(data)
 
-@app.route('/add/comment',methods=['POST'])
-def add_comment():
-    comment_receive = request.form['comment_give']
 
-    doc = {
-        'comment': comment_receive,
-    }
-    db.performance.insert_one(doc)
+@app.route('/add/comment/<musicalid>', methods=['POST'])
+def add_comment(musicalid):
+    token_resive = request.cookies.get('mytoken')
+    try:
+        payload = jwt.decode(token_resive, SECRET_KEY, algorithms=['HS256'])
+        userid = db.user.find_one({'id': payload['id']})
+        comment_receive = request.form['comment_give']
+        doc = {
+            'id': userid,
+            'comment': comment_receive, #musicalid 값 어떻게 추가하지..
+            'musicalid': musicalid
+        }
+        db.performance.insert_one(doc)
+        return jsonify({'msg': '코멘트 등록 완료'})
 
-    return jsonify({'msg': '코멘트 등록 완료'})
+    except jwt.ExpiredSignatureError:
+        return redirect(url_for('login', msg='로그인 시간이 만료되었습니다.'))
+    except jwt.exceptions.DecodeError:
+        return redirect(url_for('login', msg='로그인 정보가 없습니다.'))
+
+@app.route('/comment/table',methods=['GET'])
+def comment_table():
+
+    return jsonify({'msg'})
 
 @app.route('/add/favorite/<musicalid>',methods=['PATCH'])
 def add_favorite(musicalid):
@@ -213,4 +230,4 @@ def crawlingInfo():
 sched.start()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0',port=8080,debug=True)
+    app.run('0.0.0.0',port=5000,debug=True)
