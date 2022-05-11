@@ -142,11 +142,12 @@ def add_favorite(musicalid):
             msg='찜 등록되었습니다.'
             db.performance.update_one({'id':musicalid},{'$set':{'likecount':likecount+1}})
         db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
+        data =  db.performance.find_one({'id':musicalid},{'_id':False})
     except Exception as e :
         print(e)
         traceback.print_exc()
         msg = '오류발생 나중에 다시 시도해 주세요'
-    return jsonify({'msg':msg})
+    return jsonify({'msg':msg,'data':data})
 
 
 @app.route('/remove/comment',methods=['POST'])
