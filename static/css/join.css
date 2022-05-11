@@ -1,0 +1,55 @@
+/*body {*/
+/*    background-image: url("../static/Musical shop (Community).jpg");*/
+/*    background-position: center;*/
+/*    background-size: cover;*/
+/*    background-repeat: no-repeat;*/
+
+/*}*/
+body {
+    background-image: url("http://ticketimage.interpark.com/MobileImage/Artist/BBS/Photo/201408/9221_1.jpg?201408081148&o=2048X1152&t=600X338&m=220X124")
+}
+
+.con {
+    box-shadow: 0px 0px 3px 0px gray;
+    width: 600px;
+    text-align: center;
+    border-radius: 10px;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+}
+
+.input-box {
+    margin: 0 auto;
+    width: 500px;
+    height: 50px;
+}
+
+.form-control, .input-box, .input-group-text {
+    border-radius: 20px;
+}
+
+
+.btn-box {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+}
+
+.btn-box > button {
+    padding: 10px 20px 10px 20px;
+    border-radius: 10px;
+}
+
+.first-box {
+    margin-top: 30px;
+}
+
+h1 {
+    color: white;
+    text-align: center;
+    margin-top: 50px;
+}

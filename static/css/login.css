@@ -1,14 +1,16 @@
-.login{
+.login {
     box-shadow: 0px 0px 3px 0px gray;
     padding: 20px;
     width: 95%;
     max-width: 500px;
     margin: 20px auto 0px auto;
 }
-.login > div{
+
+.login > div {
     margin-bottom: 20px;
 }
-.jjim{
+
+.jjim {
     width: 95%;
     height: 200px;
     max-width: 500px;
@@ -21,7 +23,8 @@
     justify-content: center;
 
 }
-.if{
+
+.if {
     font-size: 15px;
     margin: 10px auto 10px auto;
     display: flex;

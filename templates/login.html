@@ -13,80 +13,10 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
     <script src="../static/script/login.js"></script>
-
+    <link rel="stylesheet" href="../static/css/login.css">
     <title>jjim_login</title>
-    <style>
-        .login{
-            box-shadow: 0px 0px 3px 0px gray;
-            padding: 20px;
-            width: 95%;
-            max-width: 500px;
-            margin: 20px auto 0px auto;
-        }
-        .login > div{
-            margin-bottom: 20px;
-        }
-        .jjim{
-            width: 95%;
-            height: 200px;
-            max-width: 500px;
-            margin: 20px auto 20px auto;
-            color: white;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-
-        }
-        .if{
-            font-size: 15px;
-            margin: 10px auto 10px auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-
-        body {
-
-            margin: 0px;
-
-            background-image: url("http://ticketimage.interpark.com/MobileImage/Artist/BBS/Photo/201408/9221_1.jpg?201408081148&o=2048X1152&t=600X338&m=220X124")
-
-        }
-
-        hr {
-            color: #F1F3F5;
-        }
-    </style>
     <script>
-        function to_join() {
-            window.location.href = "/join"
-        }
 
-        function sign_in() {
-            let username = $("#input-username").val()
-            let password = $("#input-password").val()
-
-            $.ajax({
-                type: "POST",
-                url: "/sign_in",
-                data: {
-                    username_give: username,
-                    password_give: password
-                },
-                success: function (response) {
-                    if (response['result'] == 'success') {
-                        $.cookie('mytoken', response['token'], {path: '/'});
-                        window.location.replace("/")
-                    } else {
-                        alert(response['msg'])
-                    }
-                }
-            });
-        }
     </script>
 
 </head>

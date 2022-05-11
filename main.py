@@ -1,8 +1,6 @@
 from flask import Flask, render_template,abort,jsonify,session,request,redirect,url_for
 from pymongo import MongoClient
 import certifi
-ca = certifi.where()
-
 from selenium import webdriver
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -13,17 +11,23 @@ import hashlib
 import traceback
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
+
+
 SECRET_KEY = 'jjimsical'
+ca = certifi.where()
 client = MongoClient("mongodb+srv://admin:admin@cluster0.16hc5.mongodb.net/Cluster0?retryWrites=true&w=majority", tlsCAFile=ca)
 db = client.jjimsical
 app = Flask(__name__)
 app.secret_key=SECRET_KEY
 sched = BackgroundScheduler(daemon=True)
+
+
 # login 관련 기능 (종연)
 @app.route('/login',methods=['GET'])
 def login():
     return render_template('login.html')
 
+# login
 @app.route('/sign_in', methods=['POST'])
 def sign_in():
     username_receive = request.form['username_give']
@@ -49,6 +53,7 @@ def sign_in():
 def register():
     return render_template('join.html')
 
+# 회원가입
 @app.route('/join',methods=['POST'])
 def join_request():
     id_receive = request.form['id_give']
@@ -68,6 +73,7 @@ def join_request():
 
     return jsonify({'result': 'success' })
 
+# id 중복체크(회원가입)
 @app.route('/idcheck',methods=['POST'])
 def show_id():
     id_receive = request.form['id_give']
@@ -94,6 +100,8 @@ def index():
     except jwt.exceptions.DecodeError:
         return redirect(url_for('login', msg='로그인 정보가 없습니다.'))
 
+# 사용자 정보 조회
+# 사용자가 찜한 정보를 조회하기 위해 사용
 @app.route('/userinfo',methods=['GET'])
 def get_user_info():
     token_resive = request.cookies.get('mytoken')
@@ -103,7 +111,8 @@ def get_user_info():
         abort(404)
     return jsonify(data)
 
-
+# 공연 상세 정보
+# modal창 내부의 정보를 표시하기 위해 사용
 @app.route('/info/<musicalid>',methods=['GET'])
 def get_musical_info(musicalid):
     print(musicalid)
@@ -117,7 +126,7 @@ def get_musical_info(musicalid):
         abort(404)
     return jsonify(ret)
 
-
+# 코멘트 정보 달기 기능
 @app.route('/add/comment/<musicalid>', methods=['POST'])
 def add_comment(musicalid):
     token_resive = request.cookies.get('mytoken')
@@ -145,6 +154,8 @@ def comment_table():
 
     return jsonify({'msg'})
 
+
+# 찜 하기 기능
 @app.route('/add/favorite/<musicalid>',methods=['PATCH'])
 def add_favorite(musicalid):
     msg = ''
@@ -175,6 +186,8 @@ def add_favorite(musicalid):
 def remove_comment():
     return
 
+# 공연 정보 조회하기 위한 사용
+# 매일 0시 0분에 공연정보를 크롤링하여 db에 저장
 @sched.scheduled_job('cron',hour='0',minute='0',id='initdata')
 def crawlingInfo():
     baseUrl = 'http://ticket.yes24.com'

@@ -1,0 +1,209 @@
+.ds-img {
+    opacity: 0;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.56);
+}
+/* hover animation 효과
+transform을 사용하여 자연스러운 변화를 유도한다.*/
+@keyframes rising {
+    0% {
+        opacity: 0;
+        transform: translateY(100px);
+        transform: scaleY(80%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0px);
+        transform: scaleY(100%);
+        height: inherit;
+    }
+}
+
+.item:hover .ds-img {
+    opacity: 1;
+    animation-name: rising;
+    animation-duration: 1s;
+
+}
+
+.info-like {
+    position: absolute;
+    left: auto;
+    right: 0px;
+    bottom: 0px;
+    background-color: rgba(9, 9, 9, 0.2);
+    border-radius: 10px;
+    color: red;
+
+}
+
+.favorite_btn {
+    width: 100%;
+    height: 100%;
+
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    background-image: url("http://ticketimage.interpark.com/MobileImage/Artist/BBS/Photo/201408/9221_1.jpg?201408081148&o=2048X1152&t=600X338&m=220X124");
+    height: 400px;
+    background-size: contain;
+    background-position: center;
+}
+
+.logo-txt {
+    font-size: xxx-large;
+    background-color: rgba(0, 0, 0, 0.57);
+}
+
+.item {
+    background-color: transparent;
+}
+
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+
+    /* 숨기기 */
+    z-index: -1;
+    opacity: 0;
+}
+
+.jjimbackground {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+
+    /* 숨기기 */
+    z-index: -1;
+    opacity: 0;
+}
+
+.show {
+    opacity: 1;
+    z-index: 1000;
+    transition: all 0.5s;
+}
+
+.jjimshow {
+    opacity: 1;
+    z-index: 1000;
+    transition: all 0.5s;
+}
+
+.window {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.popup {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
+
+    width: 95%;
+    max-width: 500px;
+    margin: 20px auto 20px auto;
+    padding: 20px;
+
+    /* 초기에 약간 아래에 배치 */
+    transform: translate(-50%, -40%);
+}
+
+.show .popup {
+    transform: translate(-50%, -50%);
+    transition: all 0.5s;
+}
+
+.jjimshow .popup {
+    transform: translate(-50%, -50%);
+    transition: all 0.5s;
+}
+
+
+.modal_clsbtn {
+    width: 80px;
+    height: 40px;
+    background-color: silver;
+    color: black;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.jjimmodal_clsbtn {
+    width: 80px;
+    height: 40px;
+    background-color: silver;
+    color: black;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.modal_clsbtn_div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 15px;
+}
+
+.modalbtns {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    margin-top: 20px;
+}
+
+.modalbtns > button {
+    margin-right: 20px;
+}
+
+.modal_table {
+    border-radius: 10px;
+    border: 1px solid black;
+    table-layout: fixed;
+    margin-top: 10px;
+}
+
+.commentdiv {
+    margin-top: 20px;
+}
+
+.posterdiv {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 100px;
+    max-height: 200px;
+    float: left;
+    margin-right: 20px;
+}
+
+.poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.info {
+    margin-bottom: 10px;
+}

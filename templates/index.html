@@ -13,250 +13,8 @@
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
     <script src="../static/script/index.js"></script>
-    <script>
-        function save_comment(id) {
-            let commentval = $('#comment').val()
-            $.ajax({
-                type: "POST",
-                url: "/add/comment/" + id,
-                data: {comment_give: commentval},
-                success: function (response) {
-                    alert(response["msg"])
-                    window.location.reload()
-                }
-            });
-        }
+    <link rel="stylesheet" href="../static/css/index.css">
 
-        function comment_table() {
-            $.ajax({
-                type: 'GET',
-                url: "/comment/table",
-                success: function (data) {
-                    var html = '';
-
-                    for (key in data) {
-                        html += '<tr>';
-                        html += '<td>' + data[key] + '</td>';
-                        html += '<td>' + data[key].comment + '</td>';
-                        html += '</tr>';
-                    }
-
-                    $("#dynamicTbody").empty();
-                    $("#dynamicTbody").append(html);
-                }
-            })
-        }
-    </script>
-    <style>
-        .ds-img {
-            opacity: 0;
-            color: white;
-            background-color: rgba(0, 0, 0, 0.56);
-        }
-
-        @keyframes rising {
-            0% {
-                opacity: 0;
-                transform: translateY(100px);
-                transform: scaleY(80%);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0px);
-                transform: scaleY(100%);
-                height: inherit;
-            }
-        }
-
-        .item:hover .ds-img {
-            opacity: 1;
-            animation-name: rising;
-            animation-duration: 1s;
-
-        }
-
-        .info-like {
-            position: absolute;
-            left: auto;
-            right: 0px;
-            bottom: 0px;
-            background-color: rgba(9, 9, 9, 0.2);
-            border-radius: 10px;
-            color: red;
-
-        }
-
-        .favorite_btn {
-            width: 100%;
-            height: 100%;
-
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            background-image: url("http://ticketimage.interpark.com/MobileImage/Artist/BBS/Photo/201408/9221_1.jpg?201408081148&o=2048X1152&t=600X338&m=220X124");
-            height: 400px;
-            background-size: contain;
-            background-position: center;
-        }
-
-        .logo-txt {
-            font-size: xxx-large;
-            background-color: rgba(0, 0, 0, 0.57);
-        }
-
-        .item {
-            background-color: transparent;
-        }
-
-        .background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-
-            /* 숨기기 */
-            z-index: -1;
-            opacity: 0;
-        }
-
-        .jjimbackground {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-
-            /* 숨기기 */
-            z-index: -1;
-            opacity: 0;
-        }
-
-        .show {
-            opacity: 1;
-            z-index: 1000;
-            transition: all 0.5s;
-        }
-
-        .jjimshow {
-            opacity: 1;
-            z-index: 1000;
-            transition: all 0.5s;
-        }
-
-        .window {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
-        .popup {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #ffffff;
-            box-shadow: 0 2px 7px rgba(0, 0, 0, 0.3);
-
-            width: 95%;
-            max-width: 500px;
-            margin: 20px auto 20px auto;
-            padding: 20px;
-
-            /* 초기에 약간 아래에 배치 */
-            transform: translate(-50%, -40%);
-        }
-
-        .show .popup {
-            transform: translate(-50%, -50%);
-            transition: all 0.5s;
-        }
-
-        .jjimshow .popup {
-            transform: translate(-50%, -50%);
-            transition: all 0.5s;
-        }
-
-
-        .modal_clsbtn {
-            width: 80px;
-            height: 40px;
-            background-color: silver;
-            color: black;
-            border-radius: 10px;
-            border: 1px solid black;
-        }
-
-        .jjimmodal_clsbtn {
-            width: 80px;
-            height: 40px;
-            background-color: silver;
-            color: black;
-            border-radius: 10px;
-            border: 1px solid black;
-        }
-
-        .modal_clsbtn_div {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-
-            margin-top: 15px;
-        }
-
-        .modalbtns {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-
-            margin-top: 20px;
-        }
-
-        .modalbtns > button {
-            margin-right: 20px;
-        }
-
-        .modal_table {
-            border-radius: 10px;
-            border: 1px solid black;
-            table-layout: fixed;
-            margin-top: 10px;
-        }
-
-        .commentdiv {
-            margin-top: 20px;
-        }
-
-        .posterdiv {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            max-width: 100px;
-            max-height: 200px;
-            float: left;
-            margin-right: 20px;
-        }
-
-        .poster {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .info {
-            margin-bottom: 10px;
-        }
-    </style>
 </head>
 <body>
 <div class="logo">
@@ -284,6 +42,9 @@
 </div>
 <div class="container">
     <div class="row overflow-hidden" style="height: auto" id="item-box">
+        {# jinja2를 사용하여 데이터를 유동적으로 처리한 부분
+          bootstrap grid system을 사용하여 가로 6칸 배열을 구현하였다.
+          이해하는데 좋은 사이트 : http://shoelace.io/ #}
         {% for i in data %}
             <div class="col-md-2 card p-3 item" onclick="getMusicalInfo(this.id)" id="{{ i['id'] }}">
 
@@ -299,6 +60,7 @@
         {% endfor %}
     </div>
 </div>
+ {# 모달 창 #}
 <div class="background">
     <div class="window">
         <div class="popup">
@@ -361,29 +123,5 @@
     </div>
 </div>
 
-<script>
-    function show() {
-        document.querySelector(".background").className = "background show";
-    }
-
-    function modal_clsbtn() {
-        console.log('here')
-        document.querySelector(".background").className = "background";
-    }
-
-    // document.querySelector("#show").addEventListener("click", show);
-
-    function jjimshow() {
-        document.querySelector(".jjimbackground").className = "jjimbackground show";
-    }
-
-    function jjimmodal_clsbtn() {
-        document.querySelector(".jjimbackground").className = "jjimbackground";
-    }
-
-    // document.querySelector("#jjimshow").addEventListener("click", jjimshow);
-    // document.querySelector("#jjimmodal_clsbtn").addEventListener("click", jjimmodal_clsbtn);
-
-</script>
 </body>
 </html>

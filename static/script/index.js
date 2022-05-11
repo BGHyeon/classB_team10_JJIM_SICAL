@@ -1,3 +1,5 @@
+// 검색 기능
+// category에 따라서 다른 조건으로 탐색 진행
 function searchMusical() {
     var search = $('#search-input').val().toUpperCase();
     let performs = document.getElementById('item-box').children;
@@ -40,7 +42,7 @@ function searchMusical() {
         }
     }
 }
-
+// 검색 category 변경 이벤트
 function onChangeCategory() {
     let categoryBox = document.getElementById('category-selection')
     let categoryId = categoryBox.options[categoryBox.selectedIndex].value
@@ -57,6 +59,7 @@ function onChangeCategory() {
     }
     searchInput.val('');
 }
+// modal창을 띄우기 위한 공연 정보 검색 이벤트
 function getMusicalInfo(id) {
     $.ajax({
         type: 'GET',
@@ -87,7 +90,8 @@ function getMusicalInfo(id) {
         }
     })
 }
-
+// 찜 목록만 보기에서 선택한 공연을 찜 해제했을때
+// 바로 화면에 반영하기 위하여 다시한번 user 정보 조회후 화면에 반영
 function refreshFavoirteList() {
     $.ajax({
         type: 'GET',
@@ -108,7 +112,7 @@ function refreshFavoirteList() {
         }
     })
 }
-
+// 찜 목록만 보여주거나 전체 항목을 보여주는 이벤트
 function toggleFavoriteList() {
     $.ajax({
         type: 'GET',
@@ -139,7 +143,8 @@ function toggleFavoriteList() {
     })
 }
 
-
+// 찜 목록을 등록하거나 해제하는 이벤트
+// 등록/해제후 변화된 ❤ 수를 바로 반영한다.
 function toggleFavorite(id) {
     $.ajax({
         type: 'PATCH',
@@ -152,8 +157,49 @@ function toggleFavorite(id) {
             }
             let data = response['data']
             let target = document.getElementById(data['id']);
-            target.getElementsByClassName('info-like')[0].innerText = '❤ '+data['likecount'];
+            target.getElementsByClassName('info-like')[0].innerText = '❤ ' + data['likecount'];
         }
     })
+}
+// comment를 등록하는 이벤트
+function save_comment(id) {
+    let commentval = $('#comment').val()
+    $.ajax({
+        type: "POST",
+        url: "/add/comment/" + id,
+        data: {comment_give: commentval},
+        success: function (response) {
+            alert(response["msg"])
+            modal_clsbtn();
+        }
+    });
+}
+// 코멘트 테이블 체워넣는 이벤트(삭제)
+function comment_table() {
+    $.ajax({
+        type: 'GET',
+        url: "/comment/table",
+        success: function (data) {
+            var html = '';
 
+            for (key in data) {
+                html += '<tr>';
+                html += '<td>' + data[key] + '</td>';
+                html += '<td>' + data[key].comment + '</td>';
+                html += '</tr>';
+            }
+
+            $("#dynamicTbody").empty();
+            $("#dynamicTbody").append(html);
+        }
+    })
+}
+
+// modal 창 띄우기
+function show() {
+    document.querySelector(".background").className = "background show";
+}
+// modal 창 닫기
+function modal_clsbtn() {
+    document.querySelector(".background").className = "background";
 }
