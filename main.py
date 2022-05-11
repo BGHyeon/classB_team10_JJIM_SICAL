@@ -108,10 +108,14 @@ def get_user_info():
 def get_musical_info(musicalid):
     print(musicalid)
     data = db.performance.find_one({'id':musicalid},{'_id':False})
+    comments = list(db.comment.find({'musicalid':musicalid},{'_id':False}))
+    ret = {
+        'data' : data,
+        'comment' : comments
+    }
     if data is None:
         abort(404)
-    print(data)
-    return jsonify(data)
+    return jsonify(ret)
 
 
 @app.route('/add/comment/<musicalid>', methods=['POST'])
@@ -122,11 +126,12 @@ def add_comment(musicalid):
         userid = db.user.find_one({'id': payload['id']})
         comment_receive = request.form['comment_give']
         doc = {
-            'id': userid,
+            'id': userid['id'],
+            'nick' : userid['nick'],
             'comment': comment_receive, #musicalid 값 어떻게 추가하지..
             'musicalid': musicalid
         }
-        db.performance.insert_one(doc)
+        db.comment.insert_one(doc)
         return jsonify({'msg': '코멘트 등록 완료'})
 
     except jwt.ExpiredSignatureError:
@@ -235,4 +240,4 @@ def crawlingInfo():
 sched.start()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0',port=5000,debug=True)
+    app.run('0.0.0.0',port=8000,debug=True)
