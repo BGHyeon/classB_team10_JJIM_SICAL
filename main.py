@@ -66,7 +66,7 @@ def join_request():
            'favorite':[]}
     db.user.insert_one(doc)
 
-    return jsonify({'result': '가입 완료' })
+    return jsonify({'result': 'success' })
 
 @app.route('/idcheck',methods=['POST'])
 def show_id():
