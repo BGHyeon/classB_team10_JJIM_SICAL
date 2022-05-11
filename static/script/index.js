@@ -1,3 +1,62 @@
+function searchMusical() {
+    var search = $('#search-input').val().toUpperCase();
+    let performs = document.getElementById('item-box').children;
+    let button = $('#favorite-btn');
+    let categoryBox = document.getElementById('category-selection')
+    let categoryId = categoryBox.options[categoryBox.selectedIndex].value
+    if (button.text() == '전체 보기') {
+        button.text('찜 목록만 보기')
+    }
+    if (categoryId == 0) {
+        for (var i = 0; i < performs.length; i++) {
+            let element = performs[i];
+            if (element.getElementsByClassName('pf-tit')[0].innerText.toUpperCase().includes(search)) {
+                element.style.display = '';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    } else if (categoryId == 1) {
+        let selectDate = new Date(search)
+        for (var i = 0; i < performs.length; i++) {
+            let element = performs[i];
+            let date = element.getElementsByClassName('pf-date')[0].innerText.toUpperCase().replace('.', '-');
+            let preDate = new Date(date.split('~')[0]);
+            let lastDate = new Date(date.split('~')[1]);
+            if (selectDate >= preDate && selectDate <= lastDate) {
+                element.style.display = '';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    } else {
+        for (var i = 0; i < performs.length; i++) {
+            let element = performs[i];
+            if (element.getElementsByClassName('pf-location')[0].innerText.toUpperCase().includes(search)) {
+                element.style.display = '';
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    }
+}
+
+function onChangeCategory() {
+    let categoryBox = document.getElementById('category-selection')
+    let categoryId = categoryBox.options[categoryBox.selectedIndex].value
+    let searchInput = $('#search-input')
+
+    switch (categoryId) {
+        case '2':
+        case '0':
+            searchInput.attr('type', 'text');
+            break;
+        case '1':
+            searchInput.attr('type', 'date');
+            break;
+    }
+    searchInput.val('');
+}
 function getMusicalInfo(id) {
     $.ajax({
         type: 'GET',
