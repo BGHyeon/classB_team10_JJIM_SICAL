@@ -50,23 +50,20 @@ def register():
 def join_request():
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
-    name_give = request.form['name_give']
-    gender_give = request.form['gender_give']
     nick_give = request.form['nick_give']
-    phone_give = request.form['phone_give']
 
     pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
     doc = {'id': id_receive,
            'pw': pw_hash,
-           'name': name_give,
-           'gender': gender_give,
            'nick': nick_give,
-           'phone': phone_give,
-           'favorite':[]}
+
+           }
+
+
     db.user.insert_one(doc)
 
-    return jsonify({'result': 'success' })
+    return jsonify({'result': '가입 완료' })
 
 @app.route('/idcheck',methods=['POST'])
 def show_id():
@@ -77,7 +74,6 @@ def show_id():
         if user['id'] == id_receive:
             msg = '중복된 아이디입니다.'
     return jsonify({'msg': msg})
-
 
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')

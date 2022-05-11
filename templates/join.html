@@ -30,16 +30,22 @@
         /*    background-repeat: no-repeat;*/
 
         /*}*/
+        body {
+            background-image: url("http://ticketimage.interpark.com/MobileImage/Artist/BBS/Photo/201408/9221_1.jpg?201408081148&o=2048X1152&t=600X338&m=220X124")
+        }
         .con{
-            background-color: #dfdfdf;
+            box-shadow: 0px 0px 3px 0px gray;
             width: 600px;
             text-align: center;
             border-radius: 10px;
+            margin:  auto;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+
         }
+
         .input-box {
             margin: 0 auto;
             width: 500px;
@@ -48,15 +54,8 @@
         .form-control, .input-box, .input-group-text {
             border-radius: 20px;
         }
-        .gender {
-            margin-left: 100px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .gender > div {
-            margin-right: 80px;
-        }
+
+
         .btn-box {
             display: flex;
             justify-content: space-around;
@@ -65,6 +64,14 @@
         .btn-box > button {
             padding: 10px 20px 10px 20px;
             border-radius: 10px;
+        }
+        .first-box {
+            margin-top: 30px;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-top: 50px;
         }
     </style>
     <script>
@@ -97,10 +104,7 @@
                     data: {
                         id_give: $('#id').val(),
                         pw_give: $('#pw').val(),
-                        name_give: $('#name').val(),
-                        gender_give: $(':input:radio[name=gender]:checked').val(),
                         nick_give: $('#nick').val(),
-                        phone_give: $('#phone').val(),
                     },
                     success: function (response) {
                         if (response['result'] == 'success') {
@@ -118,11 +122,11 @@
 </head>
 
 <body>
-
+    <div class="wrap">
+        <h1>JJIMSICAL</h1>
     <div class="con">
-        <h1>회원가입</h1>
 
-        <div class="input-group mb-3 input-box">
+        <div class="input-group mb-3 input-box first-box">
             <input type="text" class="form-control" id="id" placeholder="아이디" aria-label="Username"
                    aria-describedby="basic-addon1">
             <button type="button" onclick="check_id()" class="btn btn-primary">중복확인</button>
@@ -137,39 +141,18 @@
             <input type="password" class="form-control" id="re-pw" placeholder="비밀번호 재확인" aria-label="Username"
                    aria-describedby="basic-addon1">
         </div>
-        <div class="input-group mb-3 input-box">
-            <input type="text" class="form-control" id="name" placeholder="이름" aria-label="Username"
-                   aria-describedby="basic-addon1">
-        </div>
-        <div class="input-group mb-3 input-box">
-            <span class="input-group-text" id="basic-addon1">성별</span>
-            <div class="gender">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="남성" id="flexRadioDefault1" checked>
-                    <label class="form-check-label" for="flexRadioDefault1">
-                        남성
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="gender" value="여성" id="flexRadioDefault2" >
-                    <label class="form-check-label" for="flexRadioDefault2">
-                        여성
-                    </label>
-                </div>
-            </div>
-        </div>
+
+
 
         <div class="input-group mb-3 input-box">
             <input type="text" class="form-control" id="nick" placeholder="닉네임" aria-label="Username"
                    aria-describedby="basic-addon1">
         </div>
-        <div class="input-group mb-3 input-box">
-            <input type="text" class="form-control" id="phone" placeholder="전화번호" aria-label="Username"
-                   aria-describedby="basic-addon1">
-        </div>
+
         <div class="btn-box">
             <button type="button" onclick="join()" id="" class="btn btn-primary">확인</button>
             <button type="button" onclick="cancel()" class="btn btn-primary">취소</button>
         </div>
     </div>
+        </div>
 </body>
