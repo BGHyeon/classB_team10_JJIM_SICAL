@@ -12,12 +12,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
+    <script src="../static/script/index.js"></script>
     <script>
         function save_comment(id) {
             let commentval = $('#comment').val()
             $.ajax({
                 type: "POST",
-                url: "/add/comment"+id,
+                url: "/add/comment/" + id,
                 data: {comment_give: commentval},
                 success: function (response) {
                     alert(response["msg"])
@@ -49,16 +50,46 @@
     <style>
         .ds-img {
             opacity: 0;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.56);
+        }
+
+        @keyframes rising {
+            0% {
+                opacity: 0;
+                transform: translateY(100px);
+                transform: scaleY(80%);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0px);
+                transform: scaleY(100%);
+                height: inherit;
+            }
         }
 
         .item:hover .ds-img {
             opacity: 1;
+            animation-name: rising;
+            animation-duration: 1s;
+
         }
 
-        .ds-img {
-            background-color: rgba(0, 0, 0, 0.66);
-            color: white;
-            text-align: center;
+        .info-like {
+            position: absolute;
+            left: auto;
+            right: 0px;
+            bottom: 0px;
+            background-color: rgba(9, 9, 9, 0.2);
+            border-radius: 10px;
+            color: red;
+
+        }
+
+        .favorite_btn {
+            width: 100%;
+            height: 100%;
+
         }
 
         .logo {
@@ -231,22 +262,40 @@
 <div class="logo">
     <p class="logo-txt">JJIMSICAL</p>
 </div>
-<div class="d-flex flex-row-reverse p-2">
-    <button class="favorite_btn btn btn-outline-danger" onclick="toggleFavoriteList()" id="favorite_btn">찜 목록만 보기</button>
+<div class="container">
+    <div class="row pt-2 pb-2">
+
+        <select class="col-1" name="categorys" id="category-selection" onchange="onChangeCategory()">
+            <option value="0">제목</option>
+            <option value="1">날짜</option>
+            <option value="2">장소</option>
+        </select>
+        <input type="text" onchange="searchMusical()" class="col-5" id="search-input">
+        <div class="col-2">
+            <button class="favorite_btn btn btn-outline-primary" onclick="searchMusical()">검색
+            </button>
+        </div>
+        <div class="col-4">
+            <button class="favorite_btn btn btn-outline-danger" onclick="toggleFavoriteList()" id="favorite_btn">찜 목록만
+                보기
+            </button>
+        </div>
+    </div>
 </div>
 <div class="container">
     <div class="row overflow-hidden" style="height: auto" id="item-box">
         {% for i in data %}
-        <div class="col-md-2 card p-3 item" onclick="getMusicalInfo(this.id)" id="{{i['id']}}">
+            <div class="col-md-2 card p-3 item" onclick="getMusicalInfo(this.id)" id="{{ i['id'] }}">
 
-            <img src="{{i['poster']}}" style="object-fit: fill" class="card-img"/>
-            <div class="ds-img card-img-overlay">
-                <h5 class="card-title">{{i['name']}}</h5>
-                <p class="card-text">{{i['date']}}</p>
-                <p class="card-text">{{i['location']}}</p>
+                <img src="{{ i['poster'] }}" style="object-fit: fill" class="card-img"/>
+                <p class="info-like p-1">❤️ {{ i['likecount'] }}</p>
+                <div class="ds-img card-img-overlay">
+                    <h5 class="card-title">{{ i['name'] }}</h5>
+                    <p class="card-text">{{ i['date'] }}</p>
+                    <p class="card-text">{{ i['location'] }}</p>
+                </div>
+
             </div>
-
-        </div>
         {% endfor %}
     </div>
 </div>
@@ -289,7 +338,9 @@
                 </div>
             </div>
             <div class="modalbtns">
-                <button onclick="save_comment()" type="button" class="btn btn-dark">코멘트 등록</button>
+                <button onclick="save_comment(this.title)" type="button" class="btn btn-dark" id="modal" title="">
+                    코멘트 등록
+                </button>
                 <button onclick="toggleFavorite(this.title)" type="button" class="btn btn-outline-dark"
                         id='favorite-btn' title=''>찜 ❤️
                 </button>
@@ -333,89 +384,6 @@
     // document.querySelector("#jjimshow").addEventListener("click", jjimshow);
     // document.querySelector("#jjimmodal_clsbtn").addEventListener("click", jjimmodal_clsbtn);
 
-    function getMusicalInfo(id) {
-        $.ajax({
-            type: 'GET',
-            url: '/info/' + id,
-            success: function (response) {
-                console.log(response)
-                alert(response['name'] + '\n' + response['location'] + '\n' + response['date'] + '\n' + response['poster'])
-                $('#modal_title').text(response['name']);
-                $('#modal_period').text(response['date']);
-                $('#modal_loca').text(response['location']);
-                $('#modal_poster').attr('src', response['poster']);
-                $('#favorite-btn').attr('title',response['id']);
-                show()
-            }
-        })
-    }
-
-    function refreshFavoirteList() {
-        $.ajax({
-            type: 'GET',
-            url: '/userinfo',
-            success: function (response) {
-                favoritelist = response['favorite']
-                console.log(response)
-                let performs = document.getElementById('item-box').children
-                for (var i = 0; i < performs.length; i++) {
-                    element = performs[i]
-                    performid = element.getAttribute('id');
-                    if (favoritelist.includes(performid)) {
-                        element.style.display = '';
-                    } else {
-                        element.style.display = 'none';
-                    }
-                }
-            }
-        })
-    }
-
-        function toggleFavoriteList() {
-        $.ajax({
-            type: 'GET',
-            url: '/userinfo',
-            success: function (response) {
-                favoritelist = response['favorite']
-                button = $('#favorite_btn');
-
-                let performs = document.getElementById('item-box').children
-                for(var i = 0 ; i < performs.length;i++){
-                    element = performs[i]
-                    performid = element.getAttribute('id');
-                    if (favoritelist.includes(performid)) {
-                        element.style.display = '';
-                    } else {
-                        if(button.text()=='찜 목록만 보기')
-                            element.style.display = 'none';
-                        else
-                            element.style.display='';
-                    }
-                }
-                if (button.text() == '찜 목록만 보기') {
-                    button.text('전체 보기')
-                } else {
-                    button.text('찜 목록만 보기')
-                }
-            }
-        })
-    }
-
-
-    function toggleFavorite(id) {
-        $.ajax({
-            type:'PATCH',
-            url:'/add/favorite/'+id,
-            success:function (response){
-                alert(response['msg'])
-                 button = $('#favorite_btn');
-                if (button.text() == '전체 보기') {
-                    refreshFavoirteList();
-                }
-            }
-        })
-
-    }
 </script>
 </body>
 </html>
