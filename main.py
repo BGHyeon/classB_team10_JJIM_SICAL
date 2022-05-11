@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import uuid
 import jwt
 import hashlib
+import traceback
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 SECRET_KEY = 'jjimsical'
@@ -52,23 +53,20 @@ def register():
 def join_request():
     id_receive = request.form['id_give']
     pw_receive = request.form['pw_give']
-    name_give = request.form['name_give']
-    gender_give = request.form['gender_give']
     nick_give = request.form['nick_give']
-    phone_give = request.form['phone_give']
 
     pw_hash = hashlib.sha256(pw_receive.encode('utf-8')).hexdigest()
 
     doc = {'id': id_receive,
            'pw': pw_hash,
-           'name': name_give,
-           'gender': gender_give,
            'nick': nick_give,
-           'phone': phone_give,
-           'favorite':[]}
+
+           }
+
+
     db.user.insert_one(doc)
 
-    return jsonify({'result': '가입 완료' })
+    return jsonify({'result': 'success' })
 
 @app.route('/idcheck',methods=['POST'])
 def show_id():
@@ -79,7 +77,6 @@ def show_id():
         if user['id'] == id_receive:
             msg = '중복된 아이디입니다.'
     return jsonify({'msg': msg})
-
 
 # 메인 페이지 관련 기능 개발(규현, 승재)
 @app.route('/')
@@ -149,16 +146,22 @@ def add_favorite(musicalid):
         userid = session.get('id', 'Noinfo')
         user = db.user.find_one({'id':userid},{'_id':False})
         favorites = list(user['favorite'])
+        likecount = db.performance.find_one({'id':musicalid})['likecount']
         if musicalid in favorites:
             favorites.remove(musicalid)
             msg = '찜 목록에서 제거되었습니다.'
+            db.performance.update_one({'id':musicalid},{'$set':{'likecount':likecount-1}})
         else:
             favorites.append(musicalid)
             msg='찜 등록되었습니다.'
+            db.performance.update_one({'id':musicalid},{'$set':{'likecount':likecount+1}})
         db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
-    except:
+        data =  db.performance.find_one({'id':musicalid},{'_id':False})
+    except Exception as e :
+        print(e)
+        traceback.print_exc()
         msg = '오류발생 나중에 다시 시도해 주세요'
-    return jsonify({'msg':msg})
+    return jsonify({'msg':msg,'data':data})
 
 
 @app.route('/remove/comment',methods=['POST'])
@@ -189,6 +192,7 @@ def crawlingInfo():
             'name': a.select_one('p.rlb-tit').text,
             'date': a.select_one('p.rlb-sub-tit').text[0:21],
             'location': a.select_one('p.rlb-sub-tit').text[21:],
+            'likecount' : 0
         }
 
         herfs.append(data)
@@ -217,6 +221,7 @@ def crawlingInfo():
                 'name': b.select_one('p.rank-list-tit').text,
                 'date': date,
                 'location': locationText,
+                'likecount' : 0
             }
             herfs.append(data)
 
