@@ -150,6 +150,9 @@ function toggleFavorite(id) {
             if (button.text() == '전체 보기') {
                 refreshFavoirteList();
             }
+            let data = response['data']
+            let target = document.getElementById(data['id']);
+            target.getElementsByClassName('info-like')[0].innerText = '❤ '+data['likecount'];
         }
     })
 

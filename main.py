@@ -129,7 +129,8 @@ def add_comment(musicalid):
             'id': userid['id'],
             'nick' : userid['nick'],
             'comment': comment_receive, #musicalid 값 어떻게 추가하지..
-            'musicalid': musicalid
+            'musicalid': musicalid,
+            'favorite':[]
         }
         db.comment.insert_one(doc)
         return jsonify({'msg': '코멘트 등록 완료'})
