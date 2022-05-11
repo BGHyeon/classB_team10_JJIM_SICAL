@@ -60,7 +60,7 @@ def join_request():
     doc = {'id': id_receive,
            'pw': pw_hash,
            'nick': nick_give,
-
+            'favorite':[]
            }
 
 
@@ -85,7 +85,8 @@ def index():
     try:
         payload = jwt.decode(token_resive, SECRET_KEY, algorithms=['HS256'])
         user_info = db.user.find_one({'id': payload['id']});
-        session['id'] = user_info['id'];
+        if user_info is None:
+            return redirect(url_for('login', msg='로그인후 사용해 주세요.'))
         lists = list(db.performance.find({}, {'_id': False}))
         return render_template('index.html', data=lists)
     except jwt.ExpiredSignatureError:
@@ -95,10 +96,9 @@ def index():
 
 @app.route('/userinfo',methods=['GET'])
 def get_user_info():
-    userid = session.get('id','NoInfo')
-    if userid == 'NoInfo':
-        abort(404)
-    data = db.user.find_one({'id': userid}, {'_id': False})
+    token_resive = request.cookies.get('mytoken')
+    payload = jwt.decode(token_resive, SECRET_KEY, algorithms=['HS256'])
+    data= db.user.find_one({'id': payload['id']},{'_id':False})
     if data is None:
         abort(404)
     return jsonify(data)
@@ -148,6 +148,7 @@ def comment_table():
 @app.route('/add/favorite/<musicalid>',methods=['PATCH'])
 def add_favorite(musicalid):
     msg = ''
+    data={}
     try:
         userid = session.get('id', 'Noinfo')
         user = db.user.find_one({'id':userid},{'_id':False})
@@ -241,4 +242,4 @@ def crawlingInfo():
 sched.start()
 
 if __name__ == '__main__':
-    app.run('0.0.0.0',port=8000,debug=True)
+    app.run('0.0.0.0',port=5000,debug=True)
