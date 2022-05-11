@@ -5,9 +5,9 @@ import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from bs4 import BeautifulSoup
 import uuid
-import hashlib
 import jwt
 import hashlib
+import traceback
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 SECRET_KEY = 'jjimsical'
@@ -132,14 +132,19 @@ def add_favorite(musicalid):
         userid = session.get('id', 'Noinfo')
         user = db.user.find_one({'id':userid},{'_id':False})
         favorites = list(user['favorite'])
+        likecount = db.performance.find_one({'id':musicalid})['likecount']
         if musicalid in favorites:
             favorites.remove(musicalid)
             msg = '찜 목록에서 제거되었습니다.'
+            db.performance.update_one({'id':musicalid},{'$set':{'likecount':likecount-1}})
         else:
             favorites.append(musicalid)
             msg='찜 등록되었습니다.'
+            db.performance.update_one({'id':musicalid},{'$set':{'likecount':likecount+1}})
         db.user.update_one({'id':userid},{'$set':{'favorite':favorites}})
-    except:
+    except Exception as e :
+        print(e)
+        traceback.print_exc()
         msg = '오류발생 나중에 다시 시도해 주세요'
     return jsonify({'msg':msg})
 
@@ -172,6 +177,7 @@ def crawlingInfo():
             'name': a.select_one('p.rlb-tit').text,
             'date': a.select_one('p.rlb-sub-tit').text[0:21],
             'location': a.select_one('p.rlb-sub-tit').text[21:],
+            'likecount' : 0
         }
 
         herfs.append(data)
@@ -200,6 +206,7 @@ def crawlingInfo():
                 'name': b.select_one('p.rank-list-tit').text,
                 'date': date,
                 'location': locationText,
+                'likecount' : 0
             }
             herfs.append(data)
 
