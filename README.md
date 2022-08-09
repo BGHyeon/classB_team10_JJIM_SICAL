@@ -22,4 +22,4 @@
     * 모달 창 표시
     * 코멘트 등록
 
-[![시연 영상]](https://youtu.be/KI-b5uEY4v0)
+[![시연 영상](https://i9.ytimg.com/vi_webp/KI-b5uEY4v0/mqdefault.webp?v=627b78ae&sqp=CNz-yJcG&rs=AOn4CLDn93ttsS29NPn8GK9iJmyx7imBcQ)](https://youtu.be/KI-b5uEY4v0)
